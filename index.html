@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBM Real-time Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<!-- Canvas element for the chart -->
+<canvas id="ibmChart" width="800" height="400"></canvas>
+
+<script>
+    // Use jQuery's ajax method instead of the 'request' module since we are in a browser environment
+    $(document).ready(function() {
+        $.ajax({
+            url: 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=1min&apikey=Y8LETOLT99NRN9CG',
+            dataType: 'json',
+            success: function(data) {
+                var timeSeries = data['Time Series (1min)'];
+
+                // Extract data for the chart
+                var labels = Object.keys(timeSeries).reverse(); // To make sure it starts from the oldest
+                var dataset = labels.map(time => timeSeries[time]['4. close']); // This extracts the closing prices
+
+                var ctx = document.getElementById('ibmChart').getContext('2d');
+                var chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'IBM Closing Price',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Example color
+                            borderColor: 'rgba(75, 192, 192, 1)', // Example color
+                            data: dataset
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'minute'
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            error: function(error) {
+                console.log('Error:', error);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
